@@ -155,14 +155,14 @@ class ModifiedResNet(nn.Module):
 
 
 class LayerNorm(nn.LayerNorm):
-    """Subclass torch's LayerNorm to handle fp16."""
+    def __init__(self, *args, **kwargs):
+        super(LayerNorm, self).__init__()
+        self.inner_layernorm = nn.LayerNorm(*args, **kwargs)
 
     def forward(self, x: torch.Tensor):
         orig_type = x.dtype
-        ret = F.layer_norm(
-            x.type(torch.float32), self.normalized_shape, self.weight, self.bias, self.eps)
+        ret = super().forward(x.type(torch.float32))
         return ret.type(orig_type)
-
 
 class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
